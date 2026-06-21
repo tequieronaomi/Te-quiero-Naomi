@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Naomi ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌸</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { min-height:100vh; background:#0d0608; font-family:'Montserrat',sans-serif; overflow-x:hidden; color:#f5e6ea; }
+
+  .bg {
+    position:fixed; inset:0; z-index:0;
+    background: radial-gradient(ellipse at 20% 50%, #2a0a14 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, #1a0a20 0%, transparent 55%),
+                radial-gradient(ellipse at 60% 80%, #200810 0%, transparent 50%), #0d0608;
+  }
+
+  .stars { position:fixed; inset:0; z-index:0; }
+  .star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; animation:twinkle ease-in-out infinite; }
+  @keyframes twinkle { 0%,100%{opacity:0.1} 50%{opacity:0.7} }
+
+  /* Falling lily */
+  .lily { position:fixed; top:-80px; opacity:0; animation:lilyFall linear infinite; z-index:1; pointer-events:none; will-change:transform; }
+  @keyframes lilyFall {
+    0%   { transform:translateY(0) rotate(0deg); opacity:0; }
+    8%   { opacity:0.5; }
+    88%  { opacity:0.18; }
+    100% { transform:translateY(calc(100vh + 120px)) rotate(380deg); opacity:0; }
+  }
+
+  /* Floating hearts */
+  .float-heart { position:fixed; font-size:18px; pointer-events:none; animation:heartFloat 1.5s ease-out forwards; z-index:100; }
+  @keyframes heartFloat { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-110px) scale(1.3)} }
+
+  /* Music btn */
+  #music-btn {
+    position:fixed; bottom:24px; right:24px; z-index:200;
+    width:48px; height:48px; border-radius:50%;
+    background:rgba(122,48,72,0.35); border:1px solid rgba(212,96,122,0.5);
+    color:#f5e6ea; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all 0.3s; backdrop-filter:blur(6px);
+  }
+  #music-btn:hover { background:rgba(212,96,122,0.35); border-color:#d4607a; transform:scale(1.08); }
+  .bars { display:flex; align-items:flex-end; gap:2px; height:16px; }
+  .bars span { display:block; width:3px; background:#f5e6ea; border-radius:2px; animation:barPulse 0.8s ease-in-out infinite; transform-origin:bottom; }
+  .bars span:nth-child(1){height:6px;animation-delay:0s}
+  .bars span:nth-child(2){height:14px;animation-delay:.15s}
+  .bars span:nth-child(3){height:9px;animation-delay:.3s}
+  .bars span:nth-child(4){height:12px;animation-delay:.1s}
+  @keyframes barPulse { 0%,100%{transform:scaleY(0.35)} 50%{transform:scaleY(1)} }
+  .bars.paused span { animation-play-state:paused; }
+
+  #app { position:relative; z-index:10; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1.5rem; }
+
+  /* Intro */
+  #intro { text-align:center; animation:fadeUp 1.2s ease forwards; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  .intro-heart { font-size:48px; display:block; margin-bottom:1rem; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+  .intro-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(72px,14vw,130px);
+    font-style:italic; font-weight:300;
+    letter-spacing:0.04em;
+    margin-bottom:0.3rem;
+    line-height:1.1;
+    background: linear-gradient(120deg, #f5c8d4 0%, #e8809a 20%, #ffffff 38%, #d4607a 52%, #f0b0c4 68%, #ffffff 80%, #c4506a 100%);
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: nameShimmer 4s linear infinite;
+    display:inline-block;
+  }
+  @keyframes nameShimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 250% center; }
+  }
+  .intro-sub { font-size:13px; font-weight:300; color:#9a6070; letter-spacing:0.2em; text-transform:uppercase; margin-bottom:2.5rem; }
+  .btn-start { display:inline-block; padding:14px 40px; border:1px solid #7a3048; color:#f5e6ea; font-family:'Montserrat',sans-serif; font-size:13px; font-weight:300; letter-spacing:0.2em; text-transform:uppercase; background:transparent; cursor:pointer; transition:all 0.4s; border-radius:2px; }
+  .btn-start:hover { background:rgba(122,48,72,0.3); border-color:#c4607a; color:white; }
+
+  .lily-row { display:flex; justify-content:center; gap:28px; margin-bottom:1.8rem; }
+
+  /* Cards */
+  #card-screen { display:none; width:100%; max-width:560px; text-align:center; }
+  .progress-wrap { margin-bottom:2.5rem; }
+  .progress-label { font-size:11px; letter-spacing:0.25em; color:#7a3048; text-transform:uppercase; margin-bottom:10px; }
+  .progress-track { width:100%; height:1px; background:rgba(122,48,72,0.25); }
+  .progress-fill { height:100%; background:linear-gradient(to right,#7a3048,#d4607a); transition:width 0.5s ease; }
+  
+  /* Heart meter */
+  .heart-meter { display:flex; align-items:center; gap:8px; justify-content:center; margin-bottom:1.2rem; }
+  .heart-meter-track { flex:1; height:6px; background:rgba(122,48,72,0.18); border-radius:10px; overflow:hidden; }
+  .heart-meter-fill { height:100%; background:linear-gradient(to right, #7a2040, #d4607a, #f5a0b8); border-radius:10px; transition:width 0.5s cubic-bezier(.4,0,.2,1); box-shadow:0 0 8px rgba(212,96,122,0.4); }
+  .heart-meter-icon { font-size:16px; animation:pulse 2s ease-in-out infinite; flex-shrink:0; }
+  .heart-count { font-size:11px; color:#7a3048; letter-spacing:0.15em; flex-shrink:0; min-width:54px; text-align:right; }
+
+  .card-box {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(212,96,122,0.2);
+    border-radius:4px; padding:3.5rem 3rem; min-height:260px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; backdrop-filter:blur(8px); transition:opacity 0.35s,transform 0.35s;
+  }
+  .card-box::before { content:''; position:absolute; inset:0; border-radius:4px; background:radial-gradient(ellipse at center,rgba(212,96,122,0.06) 0%,transparent 70%); pointer-events:none; }
+  .card-box.hide { opacity:0; transform:scale(0.97); }
+  .card-corner-lily { position:absolute; opacity:0.15; }
+  .card-corner-lily.tl { top:12px; left:14px; }
+  .card-corner-lily.br { bottom:12px; right:14px; transform:rotate(180deg); }
+  .card-num { font-size:11px; letter-spacing:0.3em; color:#7a3048; text-transform:uppercase; margin-bottom:1.5rem; }
+  .card-text { font-family:'Cormorant Garamond',serif; font-size:clamp(22px,4vw,32px); font-weight:300; font-style:italic; color:#f5e6ea; line-height:1.5; }
+  .card-deco { width:40px; height:1px; background:rgba(212,96,122,0.4); margin:1.5rem auto 0; }
+
+  .nav-row { display:flex; align-items:center; justify-content:center; gap:1.5rem; margin-top:2rem; }
+  .nav-btn { background:transparent; border:1px solid rgba(122,48,72,0.5); color:#9a6070; font-family:'Montserrat',sans-serif; font-size:11px; letter-spacing:0.2em; text-transform:uppercase; padding:10px 22px; cursor:pointer; border-radius:2px; transition:all 0.3s; }
+  .nav-btn:hover:not(:disabled) { border-color:#d4607a; color:#f5e6ea; }
+  .nav-btn:disabled { opacity:0.2; cursor:default; }
+  .nav-btn.primary { border-color:#7a3048; color:#f5e6ea; background:rgba(122,48,72,0.2); }
+  .nav-btn.primary:hover:not(:disabled) { background:rgba(212,96,122,0.3); border-color:#d4607a; }
+  .nav-count { font-size:12px; color:#7a3048; letter-spacing:0.1em; min-width:60px; text-align:center; }
+
+  /* Final */
+  #final-screen { display:none; width:100%; max-width:600px; text-align:center; animation:fadeUp 1s ease forwards; }
+  .final-heart { font-size:36px; display:block; margin-bottom:1.5rem; animation:pulse 2s ease-in-out infinite; }
+  .final-title { font-family:'Cormorant Garamond',serif; font-size:clamp(36px,6vw,56px); font-weight:300; color:#f5e6ea; letter-spacing:0.2em; margin-bottom:2.5rem; }
+  .final-divider { width:60px; height:1px; background:rgba(212,96,122,0.5); margin:0 auto 2.5rem; }
+  .final-text { font-family:'Cormorant Garamond',serif; font-size:clamp(17px,2.5vw,20px); font-weight:300; color:#c8a0aa; line-height:2; }
+  .final-text p+p { margin-top:1.5rem; }
+  .final-sign { margin-top:2.5rem; font-family:'Cormorant Garamond',serif; font-size:14px; font-style:italic; color:#7a3048; letter-spacing:0.15em; }
+  .btn-restart { display:inline-block; margin-top:2.5rem; padding:12px 32px; border:1px solid rgba(122,48,72,0.5); color:#9a6070; font-family:'Montserrat',sans-serif; font-size:11px; font-weight:300; letter-spacing:0.2em; text-transform:uppercase; background:transparent; cursor:pointer; border-radius:2px; transition:all 0.3s; }
+  .btn-restart:hover { border-color:#d4607a; color:#f5e6ea; }
+
+  .conf-lily { position:fixed; top:-80px; pointer-events:none; animation:confLily linear forwards; z-index:50; }
+  @keyframes confLily { 0%{opacity:0.9;transform:translateY(0) rotate(0deg)} 100%{opacity:0;transform:translateY(calc(100vh + 120px)) rotate(540deg)} }
+
+
+  /* Acrostic screen */
+  #acrostic-screen {
+    display:none; width:100%; max-width:520px;
+    text-align:center; animation:fadeUp 1s ease forwards;
+  }
+  .acrostic-pre {
+    font-family:'Cormorant Garamond',serif;
+    font-size:13px; font-weight:300; font-style:italic;
+    color:#7a3048; letter-spacing:0.25em; text-transform:uppercase;
+    margin-bottom:2.5rem;
+  }
+  .acrostic-lines { margin-bottom:2.8rem; }
+  .acrostic-line {
+    display:flex; align-items:baseline; justify-content:center;
+    gap:14px; margin-bottom:1.4rem;
+    opacity:0; transform:translateY(16px);
+    animation:acroFade 0.7s ease forwards;
+  }
+  @keyframes acroFade { to { opacity:1; transform:translateY(0); } }
+  .acro-letter {
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic; font-weight:300;
+    font-size:clamp(56px,11vw,86px);
+    line-height:1;
+    background: linear-gradient(120deg, #f5c8d4 0%, #e8809a 20%, #ffffff 38%, #d4607a 52%, #f0b0c4 68%, #ffffff 80%, #c4506a 100%);
+    background-size:250% auto;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    animation: nameShimmer 4s linear infinite;
+    flex-shrink:0; min-width:60px; width:auto; text-align:right; padding-right:4px;
+    display:inline-block; overflow:visible;
+  }
+  .acro-dash {
+    font-family:'Cormorant Garamond',serif;
+    font-size:18px; color:rgba(212,96,122,0.4); flex-shrink:0;
+  }
+  .acro-text {
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(17px,3vw,22px);
+    font-weight:300; font-style:italic;
+    color:#c8a0aa; text-align:left; line-height:1.3;
+  }
+  .acrostic-btn {
+    display:inline-block; margin-top:0.5rem; padding:13px 36px;
+    border:1px solid #7a3048; color:#f5e6ea;
+    font-family:'Montserrat',sans-serif; font-size:12px;
+    font-weight:300; letter-spacing:0.22em; text-transform:uppercase;
+    background:transparent; cursor:pointer; border-radius:2px; transition:all 0.4s;
+  }
+  .acrostic-btn:hover { background:rgba(212,96,122,0.25); border-color:#d4607a; }
+
+  #yt-frame { position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="stars" id="stars"></div>
+<div id="lily-container"></div>
+
+<button id="music-btn" onclick="toggleMusic()" title="Música">
+  <div class="bars paused" id="bars"><span></span><span></span><span></span><span></span></div>
+</button>
+
+<div id="app">
+
+  <!-- INTRO -->
+  <div id="intro">
+    <span class="intro-heart">♥</span>
+    <div class="lily-row" id="intro-lilies"></div>
+    <h1 class="intro-title">Naomi</h1>
+    <p class="intro-sub">100 razones por las que me encanta</p>
+    <button class="btn-start" onclick="startApp()">Empezar</button>
+  </div>
+
+  <!-- CARDS -->
+  <div id="card-screen">
+    <div class="progress-wrap">
+      <div class="heart-meter">
+        <span class="heart-meter-icon">♥</span>
+        <div class="heart-meter-track"><div class="heart-meter-fill" id="heart-prog" style="width:1%"></div></div>
+        <span class="heart-count" id="heart-count">1 / 100</span>
+      </div>
+    </div>
+    <div class="card-box" id="card-box">
+      <div class="card-corner-lily tl" id="clily-tl"></div>
+      <div class="card-corner-lily br" id="clily-br"></div>
+      <div class="card-num" id="card-num">01 / 100</div>
+      <div class="card-text" id="card-text"></div>
+      <div class="card-deco"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="prev()">← Anterior</button>
+      <span class="nav-count" id="nav-count">1 / 100</span>
+      <button class="nav-btn primary" id="btn-next" onclick="next()">Siguiente →</button>
+    </div>
+  </div>
+
+
+  <!-- ACROSTIC -->
+  <div id="acrostic-screen">
+    <p class="acrostic-pre">y la razón más importante de todas</p>
+    <div class="acrostic-lines" id="acro-lines">
+      <div class="acrostic-line" style="animation-delay:0.2s">
+        <span class="acro-letter">N</span>
+        <span class="acro-dash">—</span>
+        <span class="acro-text">Necesaria, como el aire que no notas<br>hasta que falta</span>
+      </div>
+      <div class="acrostic-line" style="animation-delay:0.55s">
+        <span class="acro-letter">A</span>
+        <span class="acro-dash">—</span>
+        <span class="acro-text">Auténtica, sin esfuerzo,<br>sin pretender ser otra cosa</span>
+      </div>
+      <div class="acrostic-line" style="animation-delay:0.9s">
+        <span class="acro-letter">O</span>
+        <span class="acro-dash">—</span>
+        <span class="acro-text">Origen de todo lo bueno<br>que me ha pasado contigo</span>
+      </div>
+      <div class="acrostic-line" style="animation-delay:1.25s">
+        <span class="acro-letter">M</span>
+        <span class="acro-dash">—</span>
+        <span class="acro-text">Mágica, sin saberlo,<br>sin intentarlo siquiera</span>
+      </div>
+      <div class="acrostic-line" style="animation-delay:1.6s">
+        <span class="acro-letter">I</span>
+        <span class="acro-dash">—</span>
+        <span class="acro-text">Irrepetible — no existe<br>nadie como tú en el mundo</span>
+      </div>
+    </div>
+    <button class="acrostic-btn" onclick="showFinal()">¿Llegaste hasta aquí? →</button>
+  </div>
+
+  <!-- FINAL -->
+  <div id="final-screen">
+    <span class="final-heart">♥</span>
+    <div class="lily-row" id="final-lilies" style="opacity:0.4; margin-bottom:1.2rem;"></div>
+    <h2 class="final-title">Para ti</h2>
+    <div class="final-divider"></div>
+    <div class="final-text">
+      <p>No sé cuándo pasó, pero en algún momento te volviste imprescindible para mí. Contigo soy el hombre más feliz del mundo, y sin ti simplemente noto que estoy incompleto. Te quiero demasiado, y ojalá algún día lo comprendas y no tengamos que separarnos nunca más.</p>
+      <p>Sé que has pasado por cosas difíciles, pero quiero que sepas que voy a hacer todo lo posible para que seas feliz. Eres mucho más fuerte de lo que crees, y te mereces sentirte así. Solo te pido que me dejes estar para ti, porque cuando estás, todo lo demás desaparece.</p>
+      <p>Podría estar contigo para siempre y nunca sería suficiente. Cada segundo que me regalas vale una vida entera de felicidad. Te mereces el mundo, te amo, Naomi. ♥</p>
+    </div>
+    <div class="final-sign">— Adam ♥</div>
+    <br>
+    <button class="acrostic-btn" onclick="showProposal()" style="margin-top:2rem;">Y ahora una última cosa... →</button>
+  </div>
+
+
+  <!-- PROPOSAL -->
+  <div id="proposal-screen" style="display:none; width:100%; max-width:560px; text-align:center; animation:fadeUp 1s ease forwards;">
+    <span style="font-size:42px; display:block; margin-bottom:1.5rem; animation:pulse 2s ease-in-out infinite;">💍</span>
+    <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(28px,5vw,42px); font-weight:300; font-style:italic; color:#f5e6ea; line-height:1.4; margin-bottom:1rem;">
+      ¿Quieres estar conmigo<br>toda la vida?
+    </h2>
+    <p style="font-family:'Cormorant Garamond',serif; font-size:clamp(15px,2.5vw,18px); font-weight:300; color:#9a6070; margin-bottom:3rem; font-style:italic;">
+      Piénsatelo bien antes de responder... aunque solo hay una respuesta correcta.
+    </p>
+    <div style="display:flex; align-items:center; justify-content:center; gap:2rem; flex-wrap:wrap;">
+      <button id="btn-yes" onclick="showYes()" style="
+        padding:16px 48px; border:1px solid #7a3048; color:#f5e6ea;
+        font-family:'Montserrat',sans-serif; font-size:13px; font-weight:300;
+        letter-spacing:0.22em; text-transform:uppercase; background:rgba(122,48,72,0.2);
+        cursor:pointer; border-radius:2px; transition:all 0.4s;
+      " onmouseover="this.style.background='rgba(212,96,122,0.3)';this.style.borderColor='#d4607a'"
+         onmouseout="this.style.background='rgba(122,48,72,0.2)';this.style.borderColor='#7a3048'">
+        Claro que sí ♥
+      </button>
+      <button id="btn-no" style="
+        padding:16px 40px; border:1px solid rgba(180,80,100,0.5); color:#c8808e;
+        font-family:'Montserrat',sans-serif; font-size:13px; font-weight:300;
+        letter-spacing:0.22em; text-transform:uppercase; background:rgba(100,30,45,0.18);
+        cursor:pointer; border-radius:2px; transition:position 0s;
+      ">
+        No
+      </button>
+    </div>
+    <p id="no-hint" style="margin-top:1.5rem; font-family:'Cormorant Garamond',serif; font-size:14px; font-style:italic; color:#5a2535; opacity:0; transition:opacity 0.4s;">
+      Ese botón no funciona por aquí 😏
+    </p>
+  </div>
+
+  <!-- YES SCREEN -->
+  <div id="yes-screen" style="display:none; width:100%; max-width:560px; text-align:center; animation:fadeUp 1s ease forwards;">
+    <span style="font-size:52px; display:block; margin-bottom:1rem; animation:pulse 2s ease-in-out infinite;">♥</span>
+    <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(32px,6vw,52px); font-weight:300; font-style:italic; color:#f5e6ea; margin-bottom:1rem;">
+      Sabía que dirías eso.
+    </h2>
+    <p style="font-family:'Cormorant Garamond',serif; font-size:clamp(17px,2.5vw,22px); font-weight:300; color:#c8a0aa; line-height:1.9; margin-bottom:2.5rem; font-style:italic;">
+      Ahora ya es oficial.<br>Tú y yo, para siempre. ♥
+    </p>
+    <div style="width:50px; height:1px; background:rgba(212,96,122,0.5); margin:0 auto 2rem;"></div>
+    <p style="font-family:'Cormorant Garamond',serif; font-size:14px; font-style:italic; color:#7a3048; letter-spacing:0.15em;">— Adam ♥</p>
+    <button onclick="restart()" style="
+      display:inline-block; margin-top:2.5rem; padding:12px 32px;
+      border:1px solid rgba(122,48,72,0.5); color:#9a6070;
+      font-family:'Montserrat',sans-serif; font-size:11px; font-weight:300;
+      letter-spacing:0.2em; text-transform:uppercase; background:transparent;
+      cursor:pointer; border-radius:2px; transition:all 0.3s;
+    " onmouseover="this.style.borderColor='#d4607a';this.style.color='#f5e6ea'"
+       onmouseout="this.style.borderColor='rgba(122,48,72,0.5)';this.style.color='#9a6070'">
+      Volver al principio
+    </button>
+  </div>
+
+</div>
+
+<audio id="bg-audio" loop preload="auto" src="anthem.mp3"></audio></audio>
+<script>
+const items = [
+  "Su sonrisa","Su carácter","Su humor","Su sinceridad","Su paciencia conmigo",
+  "Su voz","Los detalles que tiene conmigo","La seguridad que me transmite","Cuando me habla","Su cariño",
+  "Su respeto","Sus abrazos (ya quiero abrazarteee)","Su apoyo","Su risa","Sus besos (ojalá decirlo ya :(",
+  "Su fuerza para seguir adelante","Su manera de calmarme","Como me tranquiliza","Sus manitas delicadas","Su dedicación",
+  "Su carita bonita","Su presencia en los pequeños momentos","Su honestidad sobre cómo se siente","Cuando me dice que quiere estar conmigo","Cuando me halaga",
+  "Lo mona que es","Sus palabras bonitas","Cuando me anima","Su constancia","Sus palabras",
+  "Sus ojos","Su ternura","Su presencia","Cada vez que se emociona por estar conmigo","Que quiera que estemos juntos siempre",
+  "Su disposición para escucharme","Sus consejos","Los apodos que me pone","La felicidad que me hace sentir siempre","Que quiera mejorar por nosotros",
+  "El esfuerzo que pone en las cosas que le importan","Cuando me hace bromas","Cuando se pone intensa","Su respeto por mis límites","Su comprensión (no pillas una jajaja)",
+  "Su capacidad para hacerme sentir seguro","Su fortaleza cuando no aguanta más","Su amor","Cuando me dice cuánto me quiere","Cada segundo de su atención",
+  "Las caras graciosas que pone","Sus cumplidos","Su perdón","Su corazón","Su ayuda",
+  "Cada segundo que pasa conmigo","Su suavidad","Su delicadez","Su risa","Su positivismo",
+  "Su fortaleza cuando yo soy débil","Su calma cuando estoy ansioso","Que me escriba mucho","Su motivación cuando dudo de mí mismo","Cómo celebra mis logros",
+  "Su paciencia con mis defectos","Su sinceridad incluso cuando es difícil","Su vulnerabilidad (me das penita ;(","Sus sueños","El cómo me hace ser tan cursi",
+  "Su comunicación (más o menos jajaja)","Su lealtad pase lo que pase","Cómo me ayuda cuando pienso demasiado","Su compromiso","Su madurez",
+  "Su esfuerzo por estar mejor","Su confianza en mí","Que me incluya en su mundo","Cómo me reafirma su amor","Hacerme sentir especial",
+  "Que piense en mí cuando estamos separados","Sus sueños para nosotros","Su respeto durante los desacuerdos","Su calma en malos momentos","Su manera de demostrar lo que siente",
+  "Cuando me recuerda nuestros momentos bonitos","Su esfuerzo por mí","Su tiempo cuando me siento solo","Su amor cuando siento que no merezco ser amado","La forma en que demuestra su cariño",
+  "Sus palabras de ánimo","Cuando te descontrolas (ya sabes 😋)","Su amabilidad","Cuando me manda cosas sin sentido","Su entusiasmo por cada momento juntos",
+  "Su manera de hacerme sentir tan afortunado","Su apoyo incondicional","Su forma de cuidarme","Su manera de amarme","Naomi"
+];
+
+/* ─── REALISTIC LILY SVG ───────────────────────────────────────────────────
+   A true Lilium: 6 reflexed petals radiating from center, long stamens
+   with anther tips, a curved stem with one lanceolate leaf.
+   
+   p1…p6  = petal color (fill + midrib stroke)
+   stem   = stem color
+   stamen = stamen color
+   size   = scale (viewBox is always 60×90, scaled via width/height attrs)
+*/
+function makeLily(w, h, petalFill, petalEdge, stemCol, stamenCol) {
+  // Petals: 6 curved teardrop shapes radiating outward from center (cx=30,cy=42)
+  // Each petal is a closed cubic bezier path forming a reflexed lily petal
+  // with a subtle midrib line. Petals arranged at 0°,60°,120°,180°,240°,300°
+  const cx = 30, cy = 42;
+
+  // Build one petal at a given rotation (degrees)
+  // Petal shape: starts at center, widens then tapers to a curled tip
+  function petal(rot, fill, edge) {
+    return `<g transform="rotate(${rot} ${cx} ${cy})">
+      <path d="M${cx},${cy}
+               C${cx-7},${cy-8} ${cx-9},${cy-22} ${cx-3},${cy-34}
+               C${cx},${cy-40} ${cx+3},${cy-34} ${cx+3},${cy-28}
+               C${cx+8},${cy-18} ${cx+7},${cy-8} ${cx},${cy} Z"
+        fill="${fill}" stroke="${edge}" stroke-width="0.6" opacity="0.92"/>
+      <line x1="${cx}" y1="${cy-4}" x2="${cx-1}" y2="${cy-30}"
+        stroke="${edge}" stroke-width="0.5" opacity="0.5"/>
+    </g>`;
+  }
+
+  // 6 stamens radiating from center, slightly shorter than petals
+  function stamen(rot) {
+    const r = rot * Math.PI / 180;
+    const len = 18;
+    const ex = cx + Math.sin(r) * len;
+    const ey = cy - Math.cos(r) * len;
+    return `<line x1="${cx}" y1="${cy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"
+      stroke="${stamenCol}" stroke-width="0.7" opacity="0.8"/>
+      <circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="1.4" fill="${stamenCol}" opacity="0.9"/>`;
+  }
+
+  const petals = [0,60,120,180,240,300].map(r => petal(r, petalFill, petalEdge)).join('');
+  const stamens = [15,75,135,195,255,315].map(r => stamen(r)).join('');
+
+  // Curved stem going down, with one lanceolate leaf sprouting mid-stem
+  const stemPath = `M${cx},${cy+2} C${cx+4},${cy+14} ${cx-3},${cy+28} ${cx+1},${cy+48}`;
+  const leafPath = `M${cx+2},${cy+18} C${cx+14},${cy+14} ${cx+18},${cy+22} ${cx+2},${cy+28} Z`;
+
+  return `<svg width="${w}" height="${h}" viewBox="0 0 60 90" xmlns="http://www.w3.org/2000/svg">
+    <path d="${stemPath}" fill="none" stroke="${stemCol}" stroke-width="1.3"/>
+    <path d="${leafPath}" fill="${stemCol}" opacity="0.7"/>
+    ${petals}
+    ${stamens}
+    <circle cx="${cx}" cy="${cy}" r="3" fill="${stamenCol}" opacity="0.85"/>
+  </svg>`;
+}
+
+// Color variants: pinkish-white, deep rose, pale blush — all in the page palette
+const lilyVariants = [
+  { fill:'#f2c8d4', edge:'#c4607a', stem:'#4a6a3a', stamen:'#8b3a52' },
+  { fill:'#e8a0b4', edge:'#a03050', stem:'#3d5a32', stamen:'#7a2a42' },
+  { fill:'#fde8ef', edge:'#d4607a', stem:'#4a6a3a', stamen:'#9a4060' },
+  { fill:'#d4708a', edge:'#8a2040', stem:'#3d5a32', stamen:'#5a1030' },
+  { fill:'#f8d0dc', edge:'#b05070', stem:'#4a6a3a', stamen:'#804060' },
+];
+
+function randomLily(w, h) {
+  const v = lilyVariants[Math.floor(Math.random() * lilyVariants.length)];
+  return makeLily(w, h, v.fill, v.edge, v.stem, v.stamen);
+}
+
+// Populate static lily rows (intro, final)
+function fillLilyRow(id, sizes) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  sizes.forEach(([w,h]) => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = randomLily(w, h);
+    el.appendChild(wrap);
+  });
+}
+fillLilyRow('intro-lilies', [[44,66],[52,78],[44,66]]);
+fillLilyRow('final-lilies', [[40,60],[48,72],[40,60]]);
+
+// Card corner lilies (tiny)
+document.getElementById('clily-tl').innerHTML = randomLily(28, 42);
+document.getElementById('clily-br').innerHTML = randomLily(28, 42);
+
+// Stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()<0.3?3:2}px;height:${Math.random()<0.3?3:2}px;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s;opacity:${0.1+Math.random()*0.3}`;
+  starsEl.appendChild(s);
+}
+
+// Falling lilies background
+const lc = document.getElementById('lily-container');
+for (let i = 0; i < 12; i++) {
+  const d = document.createElement('div');
+  d.className = 'lily';
+  const sz = 22 + Math.random() * 22;
+  d.innerHTML = randomLily(sz, sz * 1.5);
+  const dur = 12 + Math.random() * 16;
+  const delay = -(Math.random() * dur);
+  d.style.cssText = `left:${Math.random()*100}%;animation-duration:${dur}s;animation-delay:${delay}s;`;
+  lc.appendChild(d);
+}
+
+// Audio embebido
+const audio = document.getElementById('bg-audio');
+let musicPlaying = false;
+
+function toggleMusic() {
+  if (musicPlaying) {
+    audio.pause();
+    musicPlaying = false;
+    document.getElementById('bars').classList.add('paused');
+  } else {
+    audio.play().catch(e => console.warn('Audio error:', e));
+    musicPlaying = true;
+    document.getElementById('bars').classList.remove('paused');
+  }
+}
+
+// App
+let current = 0;
+
+function startApp() {
+  document.getElementById('intro').style.display = 'none';
+  const cs = document.getElementById('card-screen');
+  cs.style.display = 'block'; cs.style.animation = 'fadeUp 0.8s ease forwards';
+  render();
+}
+
+function render() {
+  document.getElementById('card-num').textContent = String(current+1).padStart(2,'0') + ' / 100';
+  document.getElementById('card-text').textContent = items[current];
+  document.getElementById('nav-count').textContent = (current+1) + ' / 100';
+  document.getElementById('heart-prog').style.width = ((current+1)/100*100) + '%';
+  document.getElementById('heart-count').textContent = (current+1) + ' / 100';
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').textContent = current === 99 ? 'Sigue por aquí, guapa →' : 'Siguiente →';
+}
+
+function animateCard(cb) {
+  const box = document.getElementById('card-box');
+  box.classList.add('hide');
+  setTimeout(() => { cb(); box.classList.remove('hide'); }, 340);
+}
+
+function spawnHeart(btn) {
+  const h = document.createElement('div');
+  h.className = 'float-heart'; h.textContent = '♥';
+  const r = btn.getBoundingClientRect();
+  h.style.left = (r.left + r.width/2 - 9) + 'px';
+  h.style.top = r.top + 'px';
+  h.style.color = `hsl(${338+Math.random()*20},60%,${62+Math.random()*18}%)`;
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 1600);
+}
+
+function next() {
+  const btn = document.getElementById('btn-next');
+  if (current < 99) {
+    spawnHeart(btn);
+    animateCard(() => { current++; render(); });
+  } else { showAcrostic(); }
+}
+function prev() {
+  if (current > 0) animateCard(() => { current--; render(); });
+}
+
+function showAcrostic() {
+  document.getElementById('card-screen').style.display = 'none';
+  const ac = document.getElementById('acrostic-screen');
+  ac.style.display = 'block';
+  ac.style.animation = 'fadeUp 0.9s ease forwards';
+  // re-trigger letter animations by cloning lines
+  document.querySelectorAll('.acrostic-line').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+}
+
+function showFinal() {
+  document.getElementById('card-screen').style.display = 'none';
+  document.getElementById('acrostic-screen').style.display = 'none';
+  const fs = document.getElementById('final-screen');
+  fs.style.display = 'block'; fs.style.animation = 'fadeUp 1s ease forwards';
+  spawnLilyConfetti();
+}
+
+function spawnLilyConfetti() {
+  for (let i = 0; i < 24; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'conf-lily';
+      const sz = 18 + Math.random() * 20;
+      el.innerHTML = randomLily(sz, sz * 1.5);
+      el.style.left = (Math.random()*100) + 'vw';
+      el.style.top = '-80px';
+      el.style.animationDuration = (2.5 + Math.random() * 3) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 6000);
+    }, i * 140);
+  }
+}
+
+
+function showProposal() {
+  document.getElementById('final-screen').style.display = 'none';
+  const ps = document.getElementById('proposal-screen');
+  ps.style.display = 'block';
+  ps.style.animation = 'fadeUp 1s ease forwards';
+  setupNoButton();
+  spawnLilyConfetti();
+}
+
+function setupNoButton() {
+  const btn = document.getElementById('btn-no');
+  const hint = document.getElementById('no-hint');
+  let attempts = 0;
+  let isFixed = false;
+
+  function escape() {
+    attempts++;
+    const btnW = btn.offsetWidth;
+    const btnH = btn.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const margin = 80; // stay well away from edges
+
+    // Jump distance: moderate and consistent, never too wild
+    const jumpDist = 120 + Math.min(attempts * 8, 80);
+
+    let curLeft = isFixed ? parseFloat(btn.style.left) : btn.getBoundingClientRect().left;
+    let curTop  = isFixed ? parseFloat(btn.style.top)  : btn.getBoundingClientRect().top;
+
+    // Try a few random directions, pick one that keeps it away from edges
+    let newLeft, newTop, tries = 0;
+    do {
+      const angle = Math.random() * Math.PI * 2;
+      newLeft = curLeft + Math.cos(angle) * jumpDist;
+      newTop  = curTop  + Math.sin(angle) * jumpDist;
+      tries++;
+    } while (tries < 10 && (
+      newLeft < margin || newLeft > vw - btnW - margin ||
+      newTop  < margin || newTop  > vh - btnH - margin
+    ));
+
+    // Clamp with generous margin so it never hides near edge
+    newLeft = Math.max(margin, Math.min(vw - btnW - margin, newLeft));
+    newTop  = Math.max(margin, Math.min(vh - btnH - margin, newTop));
+
+    btn.style.position = 'fixed';
+    btn.style.left = newLeft + 'px';
+    btn.style.top  = newTop + 'px';
+    btn.style.zIndex = '300';
+    isFixed = true;
+
+    hint.style.opacity = '1';
+  }
+
+  btn.addEventListener('mouseenter', escape);
+
+  btn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    escape();
+  });
+}
+
+function showYes() {
+  document.getElementById('proposal-screen').style.display = 'none';
+  const ys = document.getElementById('yes-screen');
+  ys.style.display = 'block';
+  ys.style.animation = 'fadeUp 1s ease forwards';
+  spawnLilyConfetti();
+  spawnLilyConfetti();
+}
+
+function restart() {
+  current = 0;
+  document.getElementById('final-screen').style.display = 'none';
+  document.getElementById('acrostic-screen').style.display = 'none';
+  const ps = document.getElementById('proposal-screen');
+  if (ps) { ps.style.display = 'none'; }
+  const ys = document.getElementById('yes-screen');
+  if (ys) { ys.style.display = 'none'; }
+  const nb = document.getElementById('btn-no');
+  if (nb) { nb.style.position = ''; nb.style.left = ''; nb.style.top = ''; }
+  document.getElementById('intro').style.display = 'block';
+  document.querySelectorAll('.conf-lily').forEach(el => el.remove());
+}
+</script>
+</body>
+</html>
